@@ -793,3 +793,10 @@ BMADDATA.001 … BMADDATA.012
 2. **헤더 크기를 눈대중으로 0x80 으로 잡았다.** 실제는 **0x10**. 코드가 `add #16,r0` 로 말해 준다.
 3. **MFD 앞부분을 「디더 패턴」으로 오판**했다. 선형 2bpp 로 그려서 그랬고, 실제는 트위들이었다.
 4. 자작 트위들러의 `morton()` 이 **x ≥ 16 을 못 다뤄** 좌우가 복제됐다 — 32×16 은 16×16 블록 2개다.
+
+## 2026-10-31 동영상 자막
+- SFD 63개(디스크 1·2, OPDEMO 같음) 꺼냄·mp4 변환: tools/sfd_dump.py → work/movie/disc<n>/ · my files/movie/disc<n>/ — 모두 MPEG-1 320×240, 첫 GOP 13장 + GOP 15장(B 2, 열린 GOP), 24fps(fr2, 주기 3750)·30fps(fr5, 3000), 소리 ADX
+- 받아쓰기 tools/movie_asr.py(위스퍼 large-v3, VAD 끔)·movie_asr2.py(음성 구간마다 재시도) → work/movie/asr/ · STAFF.SFD 는 손대지 않음
+- 번역(내가) my files/tsv/bm_movie_001.tsv 170줄(자막 161) — 웃음·비명·1초 소리·받아쓰기 실패(MS0401·MS0501)는 자막 안 넣음, 확인 클립 my files/movie/확인/ · MS1108 = PROLOGUE 같은 소리 → 같은 자막
+- 굽기 tools/moviesub.py(아스카 op_subs 일반화): 원본 PTS=(GOP 첫 그림+시간참조)×주기 · DTS=(코딩순서+1)×주기 검산 후 앞 GOP 들만 같은 구조로 재인코딩, GOP 마다 q(2~31) 고름(그림 끝이 원래 끝+8KB 안 · 뒤 GOP 최저 화질 자리 남김), 파일 크기 그대로 → work/movie/kr/disc<n>/*.SFD 31개 · 볼 용도 my files/movie/kr/*.mp4
+- 검사: 프레임 수 원본과 같음 · 디코딩 오류 0(ffmpeg DTS 추정 경고만 — 원본에도 있음) ⏳디스크 반영·실기

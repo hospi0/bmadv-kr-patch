@@ -20,6 +20,17 @@ BUILD = os.path.join(ROOT, "work", os.environ.get("BMADV_BUILD", "build"))
 SRC = os.path.join(ROOT, "work", os.environ.get("BMADV_SRC", "disc1"))
 
 
+DISC = os.path.basename(SRC)                                            # disc1 / disc2
+
+
+def pick(base, name, sub):
+    """동영상(SFD)은 work/movie/<디스크>(원본) · work/movie/kr/<디스크>(자막) 에 있음(2026-10-31 v0.9)"""
+    p = os.path.join(base, name)
+    if os.path.exists(p) or not name.upper().endswith(".SFD"):
+        return p
+    return os.path.join(ROOT, "work", "movie", sub, DISC, name) if sub else os.path.join(ROOT, "work", "movie", DISC, name)
+
+
 def file_table(track):
     tr, pvd, rl, rn = open_iso(track)
     out = {}
@@ -49,8 +60,8 @@ def main(orig_track, out_track, names):
     with open(out_track, "r+b") as f:
         for name in names:
             lba, ln = tbl[name]
-            new = open(os.path.join(BUILD, name), "rb").read()
-            old = open(os.path.join(SRC, name), "rb").read()
+            new = open(pick(BUILD, name, "kr"), "rb").read()
+            old = open(pick(SRC, name, ""), "rb").read()
             if len(new) != ln or len(old) != ln:
                 raise SystemExit("%s 크기 불일치 (ISO %d / 빌드 %d)" % (name, ln, len(new)))
             base = lba - HIGH_DENSITY_LBA
@@ -80,7 +91,7 @@ def main(orig_track, out_track, names):
     for name in names:
         lba, ln = tbl[name]
         got = tr.read_bytes(lba, ln)
-        want = open(os.path.join(BUILD, name), "rb").read()
+        want = open(pick(BUILD, name, "kr"), "rb").read()
         same = got == want
         ok &= same
         print("  %-14s %s" % (name, "일치" if same else "★불일치"))
